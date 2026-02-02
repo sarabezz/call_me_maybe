@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Modelos (CRÍTICO - Son archivos gigantes)
+*.bin
+*.safetensors
+*.gguf
+*.pth
+*.pt
+
+# Cache de Hugging Face
+.cache/
+models/
+hub/
+transformers_cache/
+.huggingface/
+
+# Outputs (solo inputs se suben)
+attachments_project_ai/data/output/
+output/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
