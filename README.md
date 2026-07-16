@@ -76,7 +76,6 @@ The output file was also validated structurally — every entry contains `prompt
 
 
 ## Usage
-## Usage
 
 ```bash
 git clone https://github.com/sarabezz/call_me_maybe.git
