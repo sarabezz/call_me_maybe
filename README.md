@@ -127,7 +127,6 @@ Example output:
 
 
 ## Resources
-## Resources
 
 - [Hugging Face — Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B) — model used for constrained decoding
 - [Pydantic documentation](https://docs.pydantic.dev/) — data validation library used for input parsing
