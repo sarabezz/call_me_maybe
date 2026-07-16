@@ -1,80 +1,62 @@
 [
   {
-    "fn_name": "fn_add_numbers",
-    "args_names": [
-      "a",
-      "b"
-    ],
-    "args_types": {
-      "a": "float",
-      "b": "float"
+    "name": "fn_add_numbers",
+    "description": "Add two numbers",
+    "parameters": {
+      "a": {"type": "number"},
+      "b": {"type": "number"}
     },
-    "return_type": "float"
+    "returns": {"type": "number"}
   },
   {
-    "fn_name": "fn_get_square_root",
-    "args_names": [
-      "a"
-    ],
-    "args_types": {
-      "a": "float"
+    "name": "fn_get_square_root",
+    "description": "Get the square root of a number",
+    "parameters": {
+      "a": {"type": "number"}
     },
-    "return_type": "float"
+    "returns": {"type": "number"}
   },
   {
-    "fn_name": "fn_greet",
-    "args_names": [
-      "name"
-    ],
-    "args_types": {
-      "name": "str"
+    "name": "fn_greet",
+    "description": "Greet a person by name",
+    "parameters": {
+      "name": {"type": "string"}
     },
-    "return_type": "str"
+    "returns": {"type": "string"}
   },
   {
-    "fn_name": "fn_is_even",
-    "args_names": [
-      "n"
-    ],
-    "args_types": {
-      "n": "int"
+    "name": "fn_is_even",
+    "description": "Is a number even? Check divisibility by 2",
+    "parameters": {
+      "n": {"type": "number"}
     },
-    "return_type": "bool"
+    "returns": {"type": "boolean"}
   },
   {
-    "fn_name": "fn_multiply_numbers",
-    "args_names": [
-      "a",
-      "b"
-    ],
-    "args_types": {
-      "a": "float",
-      "b": "float"
+    "name": "fn_multiply_numbers",
+    "description": "Multiply two numbers, find the product of two values",
+    "parameters": {
+      "a": {"type": "number"},
+      "b": {"type": "number"}
     },
-    "return_type": "float"
+    "returns": {"type": "number"}
   },
   {
-    "fn_name": "fn_reverse_string",
-    "args_names": [
-      "s"
-    ],
-    "args_types": {
-      "s": "str"
+    "name": "fn_reverse_string",
+    "description": "Reverse the order of characters in a string",
+    "parameters": {
+      "s": {"type": "string"}
     },
-    "return_type": "str"
+    "returns": {"type": "string"}
   },
   {
-    "fn_name": "fn_substitute_string_with_regex",
-    "args_names": [
-      "source_string",
-      "regex",
-      "replacement"
-    ],
-    "args_types": {
-      "source_string": "str",
-      "regex": "str",
-      "replacement": "str"
+    "name": "fn_substitute_string_with_regex",
+    "description": "Substitute, replace or match patterns in text using regexn",
+    "parameters": {
+      "source_string": {"type": "string"},
+      "regex": {"type": "string"},
+      "replacement": {"type": "string"}
     },
-    "return_type": "str"
+    "returns": {"type": "string"}
   }
 ]

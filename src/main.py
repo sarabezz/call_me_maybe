@@ -1,75 +1,120 @@
-import json
 import sys
-from pathlib import Path #manejar rutas de forma más segura y clara
+from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from attachments_project_ai.llm_sdk import Small_LLM_Model
-from src.res_generator import save_res
 
-def load_prompts(path: str) -> list[str]:
-    file_path = Path(path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"{path} no exists")
+from .data_loader import load_prompts, load_functions, DataLoadError
+from .vocabulary import Vocabulary, VocabularyError
+from .function_selector import FunctionSelector
+from .json_generator import JSONGenerator
+from .models import FunctionCall
 
-    with open(file_path, "r") as f:
-        data = json.load(f)
 
-    if not isinstance(data, list):
-        raise ValueError(f"{path} must contain a list")
-    prompts = []
-    for case in data:
-        if not isinstance(case, dict) or "prompt" not in case:
-            raise ValueError(f"Invalid test case format: {case}")
-        prompts.append(case["prompt"])
-
-    return prompts
-
-def load_functions(path: str) -> list[dict]:
-    file_path = Path(path)
-    if not file_path.exists():
-        raise FileNotFoundError(f"{path} no extists")
-
-    with open(file_path, "r") as f:
-        functions = json.load(f)
-
-    if not isinstance(functions, list):
-        raise ValueError("functions_definition.json must be a list")
-    required_keys = {"fn_name", "args_names", "args_types", "return_type"}
-    for func in functions:
-        if not isinstance(func, dict):
-            raise ValueError("Each functions must be an object")
-        if not required_keys.issubset(func.keys()):
-            raise ValueError(f"Keys missing in the function definition: {func}")
-
-    return functions
-
-def main():
+def main() -> int:
     try:
-        print("Loading entry data...")
-        prompts = load_prompts("attachments_project_ai/data/input/function_calling_tests.json")
-        functions = load_functions("attachments_project_ai/data/input/functions_definition.json")
-        print(f"{len(prompts)} prompts and {len(functions)} functions were load\n")
+        input_dir = Path("attachments_project_ai/data/input")
+        output_dir = Path("attachments_project_ai/data/output")
 
-        #configurar el LLM
-        print("Initilazing model")
-        model = Small_LLM_Model()
-        print(f"{model._model_name} model load in {model._device}\n")
+        prompts_file = input_dir / "function_calling_tests.json"
+        functions_file = input_dir / "functions_definition.json"
+        output_file = output_dir / "function_calling_results.json"
 
-        output_path = "attachments_project_ai/data/output/function_calling_results.json"  # ✅ Ruta completa
-        print("Starting generation...")
-        save_res(prompts, functions, model, output_path)
+        # PASO 1: CARGAR DATOS
+        print("📥 Loading input data...")
+        try:
+            prompts = load_prompts(str(prompts_file))
+            functions = load_functions(str(functions_file))
+            print(f"  ✅ Loaded {len(prompts)} prompts")
+            print(f"  ✅ Loaded {len(functions)} function definitions\n")
+        except DataLoadError as e:
+            print(f"❌ Error loading data: {e}")
+            return 1
 
-    except FileNotFoundError as e:
-        print(f"\nError de archivo: {e}")
-        sys.exit(1)
-    except ValueError as e:
-        print(f"\nError de formato: {e}")
-        sys.exit(1)
+        # PASO 2: INICIALIZAR LLM
+        print("🤖 Initializing LLM...")
+        try:
+            model = Small_LLM_Model()
+            print(f"  ✅ Model loaded: {model._model_name}")
+            print(f"  ✅ Device: {model._device}\n")
+        except Exception as e:
+            print(f"❌ Error loading model: {e}")
+            return 1
+
+        # PASO 3: CARGAR VOCABULARIO
+        print("📖 Loading vocabulary...")
+        try:
+            vocabulary = Vocabulary(model)
+            print(f"  ✅ Vocabulary size: {vocabulary.size} tokens\n")
+        except VocabularyError as e:
+            print(f"❌ Error loading vocabulary: {e}")
+            return 1
+
+        # PASO 4: INICIALIZAR SELECTOR
+        print("🔧 Initializing components...\n")
+        selector = FunctionSelector(model, vocabulary, functions)
+
+        # PASO 5: PROCESAR CADA PROMPT
+        results = []
+        print("🚀 Processing prompts...\n")
+        print("=" * 70)
+
+        for i, prompt_obj in enumerate(prompts, 1):
+            prompt = prompt_obj.prompt
+            print(f"\n[{i}/{len(prompts)}] {prompt}")
+            print("-" * 70)
+
+            try:
+                # Seleccionar función con constrained decoding
+                function = selector.select_function(prompt)
+
+                if function is None:
+                    print("  ⚠️  Could not determine appropriate function")
+                    continue
+
+                print(f"  📌 Selected: {function.fn_name}")
+
+                # Extraer argumentos
+                args = selector.extract_args(prompt, function)
+                print(f"  📌 Arguments: {args}")
+
+                result = FunctionCall(
+                    prompt=prompt,
+                    fn_name=function.fn_name,
+                    args=args
+                )
+                results.append(result)
+                print("  ✅ Success")
+
+            except Exception as e:
+                print(f"  ❌ Error processing prompt: {e}")
+                continue
+
+        # PASO 6: GUARDAR RESULTADOS
+        print("\n" + "=" * 70)
+        print(f"\n💾 Saving results...")
+
+        try:
+            JSONGenerator.save_results(results, str(output_file))
+            print(f"  ✅ Results saved to: {output_file}")
+            print(f"  ✅ Total successful: {len(results)}/{len(prompts)}")
+        except IOError as e:
+            print(f"❌ Error saving results: {e}")
+            return 1
+
+        print("\n✨ Done!\n")
+        return 0
+
+    except KeyboardInterrupt:
+        print("\n\n⚠️  Interrupted by user")
+        return 1
     except Exception as e:
-        print(f"\nError inesperado: {e}")
+        print(f"\n❌ Unexpected error: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        return 1
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
