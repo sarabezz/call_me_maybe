@@ -96,8 +96,8 @@ uv run python -m src --input data/input/function_calling_tests.json --output dat
 ```
 
 The input directory must contain two files:
-data/input/function_calling_tests.json   # list of natural language prompts
-data/input/functions_definition.json     # list of function definitions
+data/input/function_calling_tests.json    # list of natural language prompts
+data/input/functions_definition.json      # list of function definitions
 
 Example prompt file:
 
