@@ -1,4 +1,4 @@
-*Este proyecto ha sido creado como parte del currículo de 42 por sarabezz.*
+*This project has been created as part of the 42 curriculum by saraberm.*
 
 # CALL_ME_MAYBE
 
